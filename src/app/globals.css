@@ -4,66 +4,80 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%; /* Light cool gray */
-    --foreground: 220 10% 25%; /* Dark cool gray for text */
-    --card: 0 0% 100%; /* White for card elements like chat widget */
-    --card-foreground: 220 10% 25%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 10% 25%;
-    --primary: 180 100% 25.1%; /* Teal */
-    --primary-foreground: 0 0% 98%; /* White text on Teal */
-    --secondary: 220 15% 92%; /* Lighter cool gray for user messages */
-    --secondary-foreground: 220 10% 20%; /* Darker gray text on secondary */
-    --muted: 220 15% 90%; /* Muted cool gray */
-    --muted-foreground: 220 10% 45%;
-    --accent: 180 100% 25.1%; /* Teal for AI messages & highlights */
-    --accent-foreground: 0 0% 98%; /* White text on Teal */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 10% 88%; /* Softer border */
-    --input: 220 10% 92%; /* Light gray input background */
-    --ring: 180 100% 25.1%; /* Teal for focus rings */
+    --background: 220 10% 12%; /* Very dark gray (almost black) */
+    --foreground: 220 15% 92%; /* Light gray for text */
+
+    --card: 220 10% 18%; /* Dark gray for AI message bubbles, input field bg */
+    --card-foreground: 220 15% 92%; /* Text on cards */
+
+    --popover: 220 10% 15%; /* Slightly darker than card for popovers */
+    --popover-foreground: 220 15% 92%;
+
+    --primary: 220 70% 55%; /* Vibrant Blue - User messages, Send button */
+    --primary-foreground: 210 100% 98%; /* White/very light blue text on Primary Blue */
+
+    --secondary: 220 10% 22%; /* AI message background (slightly lighter dark gray) */
+    --secondary-foreground: 220 15% 92%; /* Text on AI messages */
+
+    --muted: 220 10% 28%; /* Medium Dark Gray - for borders, disabled states, avatar fallbacks */
+    --muted-foreground: 220 10% 65%; /* Medium Gray - Timestamps, placeholder text */
+
+    --accent: 220 70% 55%; /* Blue - for interactive elements like focus rings */
+    --accent-foreground: 210 100% 98%; /* Text on Accent Blue */
+
+    --destructive: 0 65% 55%; /* A standard red for destructive actions */
+    --destructive-foreground: 0 0% 98%; /* White text on destructive red */
+
+    --border: 220 10% 30%; /* Subtle Border Color for widget, input field border */
+    --input: 220 10% 18%; /* Input field background - same as card */
+    --ring: 220 70% 55%; /* Focus Ring Blue */
+
+    --radius: 0.75rem; /* More pronounced rounding for messages and elements */
+    
+    /* Default chart and sidebar variables from previous theme - can be adjusted if needed */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-background: 240 5.9% 10%; /* From original dark theme */
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
-    --background: 220 15% 10%; /* Dark cool gray */
-    --foreground: 220 15% 95%; /* Light cool gray for text */
-    --card: 220 15% 13%; /* Slightly lighter dark cool gray for chat widget */
-    --card-foreground: 220 15% 95%;
-    --popover: 220 15% 10%;
-    --popover-foreground: 220 15% 95%;
-    --primary: 180 70% 40%; /* Dark mode Teal */
-    --primary-foreground: 0 0% 98%; /* White text on Teal */
-    --secondary: 220 15% 20%; /* Darker cool gray for user messages */
-    --secondary-foreground: 220 15% 90%; /* Lighter gray text on secondary */
-    --muted: 220 15% 20%;
+    --background: 220 10% 12%; 
+    --foreground: 220 15% 92%; 
+    --card: 220 10% 18%; 
+    --card-foreground: 220 15% 92%; 
+    --popover: 220 10% 15%;
+    --popover-foreground: 220 15% 92%;
+    --primary: 220 70% 55%; 
+    --primary-foreground: 210 100% 98%;
+    --secondary: 220 10% 22%; 
+    --secondary-foreground: 220 15% 92%;
+    --muted: 220 10% 28%; 
     --muted-foreground: 220 10% 65%;
-    --accent: 180 70% 40%; /* Dark mode Teal for AI messages & highlights */
-    --accent-foreground: 0 0% 98%; /* White text on Teal */
-    --destructive: 0 62.8% 30.6%;
+    --accent: 220 70% 55%; 
+    --accent-foreground: 210 100% 98%;
+    --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 10% 25%; /* Dark border */
-    --input: 220 10% 22%; /* Dark input background */
-    --ring: 180 70% 40%; /* Dark mode Teal for focus rings */
-    --chart-1: 220 70% 50%;
+    --border: 220 10% 30%; 
+    --input: 220 10% 18%; 
+    --ring: 220 70% 55%; 
+    --radius: 0.75rem;
+
+    --chart-1: 220 70% 50%; /* From original dark theme */
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
+    --sidebar-background: 240 5.9% 10%; 
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
