@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SendHorizontal, Loader2 } from 'lucide-react';
 import type { ChatMessage } from "@/hooks/use-chat-store";
+import { sendLocalChatMessage, type LocalChatResponse } from '@/services/local-chat-service';
 
 interface ChatInputProps {
   addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => void;
@@ -14,23 +15,27 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ addMessage, disabled }) => {
   const [inputValue, setInputValue] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false); // Kept for potential future local processing latency
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isProcessing || disabled) return;
 
-    const currentMessage = inputValue.trim();
-    addMessage({ text: currentMessage, sender: 'user' });
+    const userMessageText = inputValue.trim();
+    addMessage({ text: userMessageText, sender: 'user' });
     setInputValue('');
     setIsProcessing(true);
 
-    // Simulate a local agent response (echo)
-    // Using a short delay to simulate processing, can be removed if not needed
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    addMessage({ text: `Local Agent: You said: "${currentMessage}"`, sender: 'ai' });
-
-    setIsProcessing(false);
+    try {
+      const response: LocalChatResponse = await sendLocalChatMessage(userMessageText);
+      addMessage({ text: response.reply, sender: 'ai' });
+      // Optionally, you could log or use response.data
+      // console.log("Local agent response data:", response.data);
+    } catch (error) {
+      console.error("Error sending message to local agent:", error);
+      addMessage({ text: "Error: Could not get a response from the local agent.", sender: 'system' });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -69,4 +74,3 @@ const ChatInput: React.FC<ChatInputProps> = ({ addMessage, disabled }) => {
 };
 
 export default ChatInput;
-
