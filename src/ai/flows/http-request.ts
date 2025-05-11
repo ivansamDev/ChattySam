@@ -1,3 +1,4 @@
+
 // This is an example Genkit flow definition.
 
 'use server';
@@ -71,12 +72,15 @@ const httpRequestPrompt = ai.definePrompt({
   tools: [httpRequestTool],
   input: { schema: HttpRequestFlowInputSchemaInternal }, // Specify input schema for prompt
   output: { schema: HttpRequestFlowOutputSchemaInternal }, // Specify output schema for prompt
-  prompt: `You are a helpful AI assistant.
+  prompt: `You are an AI assistant designed to answer questions *only* using information retrieved via the 'httpRequest' tool. You *must not* use general knowledge.
 First, identify the language of the user's question: "{{{question}}}".
-Your goal is to answer this question. If the question explicitly asks for information from a URL or implies needing current data from an external web source, use the 'httpRequest' tool to get the necessary data.
-After obtaining any necessary data (or if no external data is needed for a general knowledge question), formulate a concise and informative answer.
-**Crucially, your final answer must be in the same language as the user's original question.**
-If you cannot answer the question or find relevant information even after using tools, indicate that in the identified user language.
+
+If the user's question requires information from a URL, use the 'httpRequest' tool to fetch the data.
+- If the tool successfully retrieves data, analyze this data and formulate a concise answer based *solely* on it.
+- If the tool is used but returns an error or no relevant data (e.g., the 'data' field in the tool's output contains an error message or is empty/irrelevant), you *must* state that you were unable to retrieve the necessary information from the specified URL.
+- If the user's question does not seem to require fetching data from a URL (i.e., the 'httpRequest' tool is not applicable or not used), you *must* state that you can only answer questions that involve fetching content from a URL and cannot answer this type of query.
+
+**Crucially, all your responses, including explanations of inability to answer, must be in the same language as the user's original question.**
 
 User question: {{{question}}}`,
 });
@@ -90,7 +94,9 @@ const httpRequestFlowInternal = ai.defineFlow(
   },
   async (input: HttpRequestFlowInput) => {
     const { output } = await httpRequestPrompt(input);
-    return { answer: output?.answer ?? 'No answer available.' };
+    // The prompt now guides the LLM to always provide a structured response.
+    // The fallback 'No answer available.' should ideally not be hit if the LLM adheres to the prompt.
+    return { answer: output?.answer ?? 'An unexpected error occurred, and no answer could be formulated.' };
   }
 );
 
