@@ -18,7 +18,7 @@ export type GenerateGreetingInput = z.infer<typeof GenerateGreetingInputSchema>;
 
 const GenerateGreetingOutputSchema = z.object({
   isGreeting: z.boolean().describe('Whether the message is a greeting or not.'),
-  greetingMessage: z.string().describe('The generated greeting message, if applicable.'),
+  greetingMessage: z.string().describe('The generated greeting message, if applicable, in the user\'s language.'),
 });
 export type GenerateGreetingOutput = z.infer<typeof GenerateGreetingOutputSchema>;
 
@@ -30,15 +30,14 @@ const prompt = ai.definePrompt({
   name: 'generateGreetingPrompt',
   input: {schema: GenerateGreetingInputSchema},
   output: {schema: GenerateGreetingOutputSchema},
-  prompt: `You are a helpful AI assistant that detects greetings and responds accordingly.
+  prompt: `You are a helpful AI assistant. Your primary task is to detect if a user's message is a greeting.
+First, identify the language of the user's message.
+If the user's message, "{{{message}}}", is a greeting, generate a polite and suitable greeting response *in the same language as the user's input message*.
+If the message is not a greeting, set 'isGreeting' to false and 'greetingMessage' to an empty string.
+Ensure your output is in JSON format as specified in the output schema.
 
-  Determine if the following message is a greeting. If it is, generate a suitable greeting message. 
-  If it is not, return isGreeting as false and greetingMessage as an empty string.
-
-  Message: {{{message}}}
-  
-  Output format: JSON
-  `,
+User Message: {{{message}}}
+`,
 });
 
 const generateGreetingFlow = ai.defineFlow(
@@ -52,3 +51,4 @@ const generateGreetingFlow = ai.defineFlow(
     return output!;
   }
 );
+

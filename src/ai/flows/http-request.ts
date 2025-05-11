@@ -3,14 +3,14 @@
 'use server';
 
 /**
- * @fileOverview An AI agent that uses an HttpRequest tool to fetch external data.
+ * @fileOverview An AI agent that uses an HttpRequest tool to fetch external data and responds in the user's language.
  *
  * - httpRequest - A function that handles running the flow to answer a question, potentially using an HTTP request.
  * - HttpRequestFlowInput - The input type for the httpRequest flow function.
  * - HttpRequestFlowOutput - The return type for the httpRequest flow function.
  * - executeDirectHttpRequest - A function for directly executing the HTTP request tool.
  * - HttpRequestToolInput - The input type for the direct tool execution.
- * - HttpRequestToolOutput - The return type for the direct tool execution.
+ * - HttpRequestToolOutput - The return type for a direct tool execution.
  */
 
 import {ai} from '@/ai/genkit';
@@ -30,7 +30,7 @@ export type HttpRequestToolOutput = z.infer<typeof HttpRequestToolOutputSchemaIn
 // Tool definition
 const httpRequestTool = ai.defineTool({
   name: 'httpRequest',
-  description: 'Make an HTTP request to fetch external data.',
+  description: 'Make an HTTP request to fetch external data. Use this tool if the user\'s question requires information from a specific URL.',
   inputSchema: HttpRequestToolInputSchemaInternal,
   outputSchema: HttpRequestToolOutputSchemaInternal,
   async execute(input: HttpRequestToolInput): Promise<HttpRequestToolOutput> {
@@ -60,7 +60,7 @@ const HttpRequestFlowInputSchemaInternal = z.object({
 export type HttpRequestFlowInput = z.infer<typeof HttpRequestFlowInputSchemaInternal>;
 
 const HttpRequestFlowOutputSchemaInternal = z.object({
-  answer: z.string().describe('The answer to the user question.'),
+  answer: z.string().describe('The answer to the user question, in the user\'s language.'),
 });
 export type HttpRequestFlowOutput = z.infer<typeof HttpRequestFlowOutputSchemaInternal>;
 
@@ -71,7 +71,12 @@ const httpRequestPrompt = ai.definePrompt({
   tools: [httpRequestTool],
   input: { schema: HttpRequestFlowInputSchemaInternal }, // Specify input schema for prompt
   output: { schema: HttpRequestFlowOutputSchemaInternal }, // Specify output schema for prompt
-  prompt: `You are a helpful AI assistant.  If the user asks a question that requires fetching data from an external source, use the httpRequest tool to get the data.  Then, provide a concise and informative answer to the user, using the data you retrieved.  If the user's question does not require external data, answer the question directly.
+  prompt: `You are a helpful AI assistant.
+First, identify the language of the user's question: "{{{question}}}".
+Your goal is to answer this question. If the question explicitly asks for information from a URL or implies needing current data from an external web source, use the 'httpRequest' tool to get the necessary data.
+After obtaining any necessary data (or if no external data is needed for a general knowledge question), formulate a concise and informative answer.
+**Crucially, your final answer must be in the same language as the user's original question.**
+If you cannot answer the question or find relevant information even after using tools, indicate that in the identified user language.
 
 User question: {{{question}}}`,
 });
@@ -94,3 +99,4 @@ const httpRequestFlowInternal = ai.defineFlow(
 export async function httpRequest(input: HttpRequestFlowInput): Promise<HttpRequestFlowOutput> {
   return httpRequestFlowInternal(input);
 }
+
