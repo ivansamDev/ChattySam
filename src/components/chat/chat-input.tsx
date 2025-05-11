@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -6,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { SendHorizontal, Loader2 } from 'lucide-react';
 import type { ChatMessage } from "@/hooks/use-chat-store";
 
-import { httpRequest as executeHttpRequestTool } from '@/ai/flows/http-request';
-import { httpRequestFlow } from '@/ai/flows/http-request';
+import {
+  httpRequest, // Renamed and corrected flow runner
+  executeDirectHttpRequest // New function for direct tool execution
+} from '@/ai/flows/http-request';
 import { storeAction } from '@/ai/flows/store-action';
 import { generateGreeting } from '@/ai/flows/generate-greeting';
 
@@ -32,7 +35,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ addMessage, disabled }) => {
       if (currentMessage.startsWith('/http ')) {
         const url = currentMessage.substring(6).trim();
         if (url) {
-          const result = await executeHttpRequestTool({ url });
+          const result = await executeDirectHttpRequest({ url });
           addMessage({ text: `Data from ${url}:\n${result.data}`, sender: 'ai' });
         } else {
           addMessage({ text: "Usage: /http <URL>", sender: 'system' });
@@ -53,7 +56,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ addMessage, disabled }) => {
           greetingProcessed = true;
         }
 
-        const httpFlowResult = await httpRequestFlow({ question: currentMessage });
+        // Use the corrected httpRequest flow runner
+        const httpFlowResult = await httpRequest({ question: currentMessage });
         const isMeaningfulAnswer = httpFlowResult.answer && httpFlowResult.answer.toLowerCase() !== 'no answer available.';
         const isNewAnswer = !greetingProcessed || (greetingProcessed && httpFlowResult.answer !== greetingResult.greetingMessage);
 
