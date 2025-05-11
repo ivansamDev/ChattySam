@@ -24,7 +24,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
   );
 
   const bubbleClasses = cn(
-    "max-w-[80%] px-3 py-2 shadow", // Adjusted padding
+    "max-w-[100%] px-3 py-2 shadow", // Adjusted padding
     "rounded-lg", // Base rounding from --radius (0.75rem)
     isUser ? "bg-primary text-primary-foreground rounded-br-sm" : // User message with pointy bottom-right
     isAI ? "bg-secondary text-secondary-foreground rounded-bl-sm" : // AI message with pointy bottom-left
@@ -35,7 +35,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
     return (
       <div className={cn("flex flex-col items-center w-full my-2")}>
         <div className={bubbleClasses}>
-          <p className="text-sm break-words whitespace-pre-wrap">{message.text}</p>
+          <p className="text-sm whitespace-pre-wrap">{message.text}</p>
         </div>
          <span className={cn("text-xs mt-1.5 text-center", "text-muted-foreground")}>
           {timeAgo}

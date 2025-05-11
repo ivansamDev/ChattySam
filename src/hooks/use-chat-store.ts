@@ -1,3 +1,4 @@
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:3324088040.
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -18,35 +19,80 @@ interface StoredChatLog {
   createdAt: number;
 }
 
+// Define the action type
+interface ActionItem {
+  id: string;
+  name: string;
+  action: string; // Could be an enum or specific string types if actions are predefined
+}
+
+// Sample actions
+const initialChatActions: ActionItem[] = [
+  { id: 'action1', name: 'Check Order Status', action: 'check_order_status' },
+  { id: 'action2', name: 'Talk to Support', action: 'talk_to_support' },
+  { id: 'action3', name: 'View FAQs', action: 'view_faqs' },
+  { id: 'action4', name: 'Update Profile', action: 'update_profile'},
+  { id: 'action5', name: 'Track Shipment', action: 'track_shipment'},
+];
+
+// Function to format actions into a message string
+const formatActionsForMessage = (actions: ActionItem[]): string => {
+  let message = "Hello! I'm ChattySam, your AI assistant. Here are some things I can help you with:";
+  actions.forEach(action => {
+    message += `\n- ${action.name}`;
+  });
+  message += "\n\nHow can I assist you today?";
+  return message;
+};
+
+
 export function useChatStore() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      let loadedMessages: ChatMessage[] = [];
+      let shouldAddInitialMessage = true; 
+
       try {
         const storedLogRaw = localStorage.getItem(STORAGE_KEY);
         if (storedLogRaw) {
           const parsedLog: StoredChatLog = JSON.parse(storedLogRaw);
           if (Date.now() - parsedLog.createdAt < EXPIRY_DURATION) {
-            setMessages(parsedLog.messages);
+            if (parsedLog.messages.length > 0) {
+              loadedMessages = parsedLog.messages;
+              shouldAddInitialMessage = false; 
+            }
           } else {
-            localStorage.removeItem(STORAGE_KEY); // Clear expired log
+            localStorage.removeItem(STORAGE_KEY); 
           }
         }
       } catch (error) {
         console.error("Failed to load messages from localStorage", error);
         localStorage.removeItem(STORAGE_KEY);
       }
+
+      if (shouldAddInitialMessage) {
+        const actionsMessageText = formatActionsForMessage(initialChatActions);
+        const systemMessage: ChatMessage = {
+          id: uuidv4(),
+          text: actionsMessageText,
+          sender: 'system',
+          timestamp: Date.now(),
+        };
+        setMessages([systemMessage]);
+      } else {
+        setMessages(loadedMessages);
+      }
       setIsInitialized(true);
     }
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array means this runs once on mount
 
   useEffect(() => {
     if (isInitialized && typeof window !== 'undefined') {
       if (messages.length === 0) {
-        // If all messages are cleared, attempt to remove the log from localStorage
-        // This check ensures we don't repeatedly try to remove if it's already gone
         if (localStorage.getItem(STORAGE_KEY)) {
           localStorage.removeItem(STORAGE_KEY);
         }
@@ -58,11 +104,9 @@ export function useChatStore() {
         const storedLogRaw = localStorage.getItem(STORAGE_KEY);
         if (storedLogRaw) {
           const parsedLog: StoredChatLog = JSON.parse(storedLogRaw);
-          // If there was a previous log with messages, and it's still valid, keep its createdAt.
           if (parsedLog.messages.length > 0 && (Date.now() - parsedLog.createdAt < EXPIRY_DURATION)) {
             effectiveCreatedAt = parsedLog.createdAt;
           }
-          // If parsedLog.messages was empty, or log was expired, effectiveCreatedAt remains Date.now(), starting a new log session.
         }
         
         const logToStore: StoredChatLog = {
@@ -72,10 +116,9 @@ export function useChatStore() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(logToStore));
       } catch (error) {
         console.error("Failed to save messages to localStorage", error);
-        // Fallback: save with current time if parsing failed or if there's an issue with the existing log
         const logToStore: StoredChatLog = {
           messages,
-          createdAt: Date.now(), // This might overwrite a valid older timestamp in error cases
+          createdAt: Date.now(), 
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(logToStore));
       }
@@ -92,8 +135,16 @@ export function useChatStore() {
   }, []);
 
   const clearChat = useCallback(() => {
-    setMessages([]);
-    // The useEffect for messages will handle removing from localStorage
+    // Add the initial system message again after clearing
+    const actionsMessageText = formatActionsForMessage(initialChatActions);
+    const systemMessage: ChatMessage = {
+      id: uuidv4(),
+      text: actionsMessageText,
+      sender: 'system',
+      timestamp: Date.now(),
+    };
+    setMessages([systemMessage]);
+    // The useEffect for messages will handle removing/updating localStorage
   }, []);
 
 
