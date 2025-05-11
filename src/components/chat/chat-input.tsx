@@ -7,13 +7,6 @@ import { Button } from "@/components/ui/button";
 import { SendHorizontal, Loader2 } from 'lucide-react';
 import type { ChatMessage } from "@/hooks/use-chat-store";
 
-import {
-  httpRequest, // Renamed and corrected flow runner
-  executeDirectHttpRequest // New function for direct tool execution
-} from '@/ai/flows/http-request';
-import { storeAction } from '@/ai/flows/store-action';
-import { generateGreeting } from '@/ai/flows/generate-greeting';
-
 interface ChatInputProps {
   addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => void;
   disabled?: boolean;
@@ -21,7 +14,7 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ addMessage, disabled }) => {
   const [inputValue, setInputValue] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false); // Kept for potential future local processing latency
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isProcessing || disabled) return;
@@ -31,50 +24,13 @@ const ChatInput: React.FC<ChatInputProps> = ({ addMessage, disabled }) => {
     setInputValue('');
     setIsProcessing(true);
 
-    try {
-      if (currentMessage.startsWith('/http ')) {
-        const url = currentMessage.substring(6).trim();
-        if (url) {
-          const result = await executeDirectHttpRequest({ url });
-          addMessage({ text: `Data from ${url}:\n${result.data}`, sender: 'ai' });
-        } else {
-          addMessage({ text: "Usage: /http <URL>", sender: 'system' });
-        }
-      } else if (currentMessage.startsWith('/action ')) {
-        const actionText = currentMessage.substring(8).trim();
-        if (actionText) {
-          const result = await storeAction({ action: actionText });
-          addMessage({ text: `Action processed: ${result.storedAction}`, sender: 'ai' });
-        } else {
-          addMessage({ text: "Usage: /action <description>", sender: 'system' });
-        }
-      } else {
-        let greetingProcessed = false;
-        const greetingResult = await generateGreeting({ message: currentMessage });
-        if (greetingResult.isGreeting) {
-          addMessage({ text: greetingResult.greetingMessage, sender: 'ai' });
-          greetingProcessed = true;
-        }
+    // Simulate a local agent response (echo)
+    // Using a short delay to simulate processing, can be removed if not needed
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-        // Use the corrected httpRequest flow runner
-        const httpFlowResult = await httpRequest({ question: currentMessage });
-        const isMeaningfulAnswer = httpFlowResult.answer && httpFlowResult.answer.toLowerCase() !== 'no answer available.';
-        const isNewAnswer = !greetingProcessed || (greetingProcessed && httpFlowResult.answer !== greetingResult.greetingMessage);
+    addMessage({ text: `Local Agent: You said: "${currentMessage}"`, sender: 'ai' });
 
-        if (isMeaningfulAnswer && isNewAnswer) {
-          addMessage({ text: httpFlowResult.answer, sender: 'ai' });
-        } else if (!greetingProcessed && !isMeaningfulAnswer) {
-          // No specific AI response for this general query
-          // You could add a default message here if desired, e.g.,
-          // addMessage({ text: "I'm not sure how to respond to that. Try asking about specific data or use a command.", sender: 'ai' });
-        }
-      }
-    } catch (error) {
-      console.error("Error processing AI:", error);
-      addMessage({ text: "Sorry, I encountered an error while processing your request.", sender: 'system' });
-    } finally {
-      setIsProcessing(false);
-    }
+    setIsProcessing(false);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -113,3 +69,4 @@ const ChatInput: React.FC<ChatInputProps> = ({ addMessage, disabled }) => {
 };
 
 export default ChatInput;
+
