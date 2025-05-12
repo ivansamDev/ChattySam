@@ -1,10 +1,10 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import ChatWidget from "@/components/chat/chat-widget";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, MessageSquareX } from 'lucide-react';
+import { ChatStoreProvider } from '@/hooks/use-chat-store'; // Import the provider
 
 export default function Home() {
   const [isChatOpen, setIsChatOpen] = useState(true);
@@ -38,7 +38,9 @@ export default function Home() {
       {/* <h1 className="text-4xl font-bold mb-8 text-center">Welcome to ChattySam</h1> */}
       
       {isChatOpen ? (
-        <ChatWidget onCloseRequested={handleCloseChat} />
+        <ChatStoreProvider> {/* Wrap ChatWidget with the provider */}
+          <ChatWidget onCloseRequested={handleCloseChat} />
+        </ChatStoreProvider>
       ) : (
         <Button
           onClick={handleOpenChat}
@@ -52,4 +54,3 @@ export default function Home() {
     </main>
   );
 }
-

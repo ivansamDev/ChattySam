@@ -1,13 +1,14 @@
+
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { sendLocalChatMessage, type LocalChatResponse } from '@/services/local-chat-service';
 
 export interface ActionItem {
   id: string;
   name: string;
-  action: string; 
+  action: string;
 }
 
 export interface ChatMessage {
@@ -42,8 +43,21 @@ const getInitialSystemMessage = (): ChatMessage => ({
   actions: initialChatActions,
 });
 
+// Define the shape of the context value
+interface ChatStoreContextType {
+  messages: ChatMessage[];
+  isInitialized: boolean;
+  isProcessingMessage: boolean;
+  submitUserMessage: (text: string) => Promise<void>;
+  submitAction: (action: string, actionName: string) => Promise<void>;
+  clearChat: () => void;
+}
 
-export function useChatStore() {
+// Create the context
+const ChatStoreContext = React.createContext<ChatStoreContextType | undefined>(undefined);
+
+// Internal hook with the actual logic
+function useChatStoreInternal(): ChatStoreContextType {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isProcessingMessage, setIsProcessingMessage] = useState(false);
@@ -51,7 +65,7 @@ export function useChatStore() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       let loadedMessages: ChatMessage[] = [];
-      let shouldAddInitialMessage = true; 
+      let shouldAddInitialMessage = true;
 
       try {
         const storedLogRaw = localStorage.getItem(STORAGE_KEY);
@@ -60,10 +74,10 @@ export function useChatStore() {
           if (Date.now() - parsedLog.createdAt < EXPIRY_DURATION) {
             if (parsedLog.messages.length > 0) {
               loadedMessages = parsedLog.messages;
-              shouldAddInitialMessage = false; 
+              shouldAddInitialMessage = false;
             }
           } else {
-            localStorage.removeItem(STORAGE_KEY); 
+            localStorage.removeItem(STORAGE_KEY);
           }
         }
       } catch (error) {
@@ -79,36 +93,30 @@ export function useChatStore() {
       setIsInitialized(true);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+  }, []);
 
   useEffect(() => {
     if (isInitialized && typeof window !== 'undefined') {
       if (messages.length === 0) {
-        // If all messages are cleared, ensure the initial system message is re-added or storage is cleared.
-        // Current clearChat handles re-adding. If messages become empty by other means, storage might need clearing.
-        if (localStorage.getItem(STORAGE_KEY)) {
-           // If messages are empty but storage exists, means it was likely cleared and should be empty
-           // or repopulated with initial. For safety, if messages array is empty, clear storage.
-           // Or rely on clearChat to always set the initial message.
-        }
-        return; 
+        localStorage.removeItem(STORAGE_KEY);
+        return;
       }
 
       let effectiveCreatedAt = Date.now();
       try {
         const storedLogRaw = localStorage.getItem(STORAGE_KEY);
-        // Only try to parse if there's actually a stored log and messages array is not empty.
-        if (storedLogRaw && messages.length > 0) {
+        if (storedLogRaw) {
           const parsedLog: StoredChatLog = JSON.parse(storedLogRaw);
-          // Preserve original creation timestamp if log is not expired and not empty
           if (parsedLog.messages.length > 0 && (Date.now() - parsedLog.createdAt < EXPIRY_DURATION)) {
             effectiveCreatedAt = parsedLog.createdAt;
           }
         }
-        
+
         const logToStore: StoredChatLog = {
           messages,
-          createdAt: (messages.length === 1 && messages[0].actions === initialChatActions) ? Date.now() : effectiveCreatedAt,
+          createdAt: (messages.length === 1 && messages[0].sender === 'system' && messages[0].actions === initialChatActions)
+                     ? Date.now()
+                     : effectiveCreatedAt,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(logToStore));
       } catch (error) {
@@ -150,6 +158,7 @@ export function useChatStore() {
     setIsProcessingMessage(true);
 
     try {
+      // Pass the action value to sendLocalChatMessage
       const response: LocalChatResponse = await sendLocalChatMessage(actionName, action);
       addMessageInternal({ text: response.reply, sender: 'ai', actions: response.actions });
     } catch (error) {
@@ -163,17 +172,34 @@ export function useChatStore() {
 
   const clearChat = useCallback(() => {
     setMessages([getInitialSystemMessage()]);
-    // localStorage will be updated by the useEffect hook watching 'messages'
+    // Also clear localStorage for a full reset
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY);
+    }
   }, []);
 
 
-  return { 
-    messages, 
-    addMessage: addMessageInternal, // Keep addMessage for direct additions if needed, though submitUserMessage is primary
-    clearChat, 
+  return {
+    messages,
     isInitialized,
+    isProcessingMessage,
     submitUserMessage,
     submitAction,
-    isProcessingMessage 
+    clearChat
   };
+}
+
+// Provider component
+export const ChatStoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const store = useChatStoreInternal();
+  return <ChatStoreContext.Provider value={store}>{children}</ChatStoreContext.Provider>;
+};
+
+// Public hook to consume the context
+export function useChatStore(): ChatStoreContextType {
+  const context = useContext(ChatStoreContext);
+  if (context === undefined) {
+    throw new Error('useChatStore must be used within a ChatStoreProvider');
+  }
+  return context;
 }
