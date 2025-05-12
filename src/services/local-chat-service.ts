@@ -13,10 +13,11 @@ export async function sendLocalChatMessage(message: string, action?: string): Pr
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 400));
 
-  const baseUrl = process.env.EXTERNAL_MARKDOWN_API_URL;
+  const baseUrl = process.env.EXTERNAL_API_URL;
+  const endpointBaseUrl = process.env.EXTERNAL_ENDPOINT_API_URL;
 
-  if (!baseUrl) {
-    console.error("EXTERNAL_MARKDOWN_API_URL is not set. Returning a mock response.");
+  if (!baseUrl || !endpointBaseUrl) {
+    console.error("EXTERNAL_API_URL is not set. Returning a mock response.");
     // Example of returning actions with a mock response
     const mockActions: ActionItem[] = [
         { id: 'mockAction1', name: 'Mock Follow-up 1', action: 'mock_follow_up_1'},
@@ -28,15 +29,15 @@ export async function sendLocalChatMessage(message: string, action?: string): Pr
         originalMessage: message,
         action,
         timestamp: new Date().toISOString(),
-        error: "EXTERNAL_MARKDOWN_API_URL not configured."
+        error: "EXTERNAL_API_URL not configured."
       },
       actions: action ? mockActions : undefined // Only return follow-up actions if an initial action was taken
     };
   }
 
   const endpoint = action
-    ? `${baseUrl}/webhook/1c936cc2-78d2-4f5b-af1f-4fe036e5d63b/?action=${encodeURIComponent(action)}`
-    : `${baseUrl}/webhook/1c936cc2-78d2-4f5b-af1f-4fe036e5d63b/?action=answer`; // Default action
+    ? `${baseUrl}/${endpointBaseUrl}?action=${encodeURIComponent(action)}`
+    : `${baseUrl}/${endpointBaseUrl}?action=answer`; // Default action
 
   try {
     const response = await fetch(endpoint, {

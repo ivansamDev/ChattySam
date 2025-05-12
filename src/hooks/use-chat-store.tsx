@@ -33,6 +33,7 @@ const initialChatActions: ActionItem[] = [
   { id: 'action3', name: 'View FAQs', action: 'view_faqs' },
   { id: 'action4', name: 'Update Profile', action: 'update_profile'},
   { id: 'action5', name: 'Track Shipment', action: 'track_shipment'},
+  { id: 'action6', name: 'Talk to Agent AI', action: 'talk_to_ai'},
 ];
 
 const getInitialSystemMessage = (): ChatMessage => ({
