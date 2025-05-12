@@ -4,6 +4,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Trash2, X } from 'lucide-react';
+import ThemeSwitcher from '@/components/theme-switcher'; // Import ThemeSwitcher
 
 interface ChatHeaderProps {
   onClearChat: () => void;
@@ -16,7 +17,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onClearChat, onCloseChat }) => 
       <div className="flex items-center gap-2">
         <h2 className="text-lg font-semibold">AI Assistant</h2>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2"> {/* Increased gap for ThemeSwitcher */}
+        <ThemeSwitcher /> 
         <Button
           variant="ghost"
           size="icon"

@@ -4,49 +4,49 @@
 
 @layer base {
   :root {
-    --background: 220 10% 12%; /* Very dark gray (almost black) */
-    --foreground: 220 15% 92%; /* Light gray for text */
+    --background: 0 0% 100%; /* White */
+    --foreground: 220 15% 10%; /* Dark Gray for text */
 
-    --card: 220 10% 18%; /* Dark gray for AI message bubbles, input field bg */
-    --card-foreground: 220 15% 92%; /* Text on cards */
+    --card: 0 0% 97%; /* Light gray */
+    --card-foreground: 220 15% 10%; /* Text on cards */
 
-    --popover: 220 10% 15%; /* Slightly darker than card for popovers */
-    --popover-foreground: 220 15% 92%;
+    --popover: 0 0% 95%; /* Slightly lighter gray */
+    --popover-foreground: 220 15% 10%;
 
-    --primary: 220 70% 55%; /* Vibrant Blue - User messages, Send button */
+    --primary: 220 70% 55%; /* Vibrant Blue */
     --primary-foreground: 210 100% 98%; /* White/very light blue text on Primary Blue */
 
-    --secondary: 220 10% 22%; /* AI message background (slightly lighter dark gray) */
-    --secondary-foreground: 220 15% 92%; /* Text on AI messages */
+    --secondary: 0 0% 92%; /* Lighter gray for AI messages */
+    --secondary-foreground: 220 15% 10%; /* Text on AI messages */
 
-    --muted: 220 10% 28%; /* Medium Dark Gray - for borders, disabled states, avatar fallbacks */
-    --muted-foreground: 220 10% 65%; /* Medium Gray - Timestamps, placeholder text */
+    --muted: 0 0% 90%; /* Medium Light Gray - for borders, disabled states */
+    --muted-foreground: 220 10% 45%; /* Medium Gray - Timestamps, placeholder text */
 
-    --accent: 220 70% 55%; /* Blue - for interactive elements like focus rings */
+    --accent: 220 70% 55%; /* Blue - for interactive elements */
     --accent-foreground: 210 100% 98%; /* Text on Accent Blue */
 
     --destructive: 0 65% 55%; /* A standard red for destructive actions */
     --destructive-foreground: 0 0% 98%; /* White text on destructive red */
 
-    --border: 220 10% 30%; /* Subtle Border Color for widget, input field border */
-    --input: 220 10% 18%; /* Input field background - same as card */
+    --border: 0 0% 88%; /* Subtle Border Color */
+    --input: 0 0% 97%; /* Input field background - same as card */
     --ring: 220 70% 55%; /* Focus Ring Blue */
 
-    --radius: 0.75rem; /* More pronounced rounding for messages and elements */
+    --radius: 0.75rem;
     
-    /* Default chart and sidebar variables from previous theme - can be adjusted if needed */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --sidebar-background: 240 5.9% 10%; /* From original dark theme */
-    --sidebar-foreground: 240 4.8% 95.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
+    --sidebar-background: 0 0% 98%; 
+    --sidebar-foreground: 240 5.9% 10%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 0 0% 90%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -70,9 +70,9 @@
     --border: 220 10% 30%; 
     --input: 220 10% 18%; 
     --ring: 220 70% 55%; 
-    --radius: 0.75rem;
+    /* --radius: 0.75rem; */ /* Radius is already defined in :root, no need to redefine unless it changes for dark mode */
 
-    --chart-1: 220 70% 50%; /* From original dark theme */
+    --chart-1: 220 70% 50%; /* Values from previous theme, can be adjusted */
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
