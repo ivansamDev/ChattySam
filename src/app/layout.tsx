@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   // No explicit ThemeProvider needed here if the useTheme hook manages global state directly (localStorage and documentElement class)
   return (
-    <html lang="en" suppressHydrationWarning> {/* suppressHydrationWarning is useful when theme class is applied client-side */}
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
         <Toaster />
