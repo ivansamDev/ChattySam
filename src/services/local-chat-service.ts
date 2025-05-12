@@ -1,9 +1,12 @@
+
 'use server';
+import type { ActionItem } from '@/hooks/use-chat-store';
 
 export interface LocalChatResponse {
   reply: string;
   localdata?: Record<string, any>;
   data?: Record<string, any>;
+  actions?: ActionItem[];
 }
 
 export async function sendLocalChatMessage(message: string, action?: string): Promise<LocalChatResponse> {
@@ -14,19 +17,25 @@ export async function sendLocalChatMessage(message: string, action?: string): Pr
 
   if (!baseUrl) {
     console.error("EXTERNAL_MARKDOWN_API_URL is not set. Returning a mock response.");
+    // Example of returning actions with a mock response
+    const mockActions: ActionItem[] = [
+        { id: 'mockAction1', name: 'Mock Follow-up 1', action: 'mock_follow_up_1'},
+        { id: 'mockAction2', name: 'Mock Follow-up 2', action: 'mock_follow_up_2'},
+    ];
     return {
-      reply: `Agent: API URL is not configured. You said "${message}"` + (action ? ` with action "${action}"` : ""),
+      reply: `Agent: API URL is not configured. You said "${message}"` + (action ? ` with action "${action}"` : "") + ". This is a mock response.",
       localdata: {
         originalMessage: message,
         action,
         timestamp: new Date().toISOString(),
         error: "EXTERNAL_MARKDOWN_API_URL not configured."
       },
+      actions: action ? mockActions : undefined // Only return follow-up actions if an initial action was taken
     };
   }
 
   const endpoint = action
-    ? `${baseUrl}/webhook/1c936cc2-78d2-4f5b-af1f-4fe036e5d63b/?action=${action}`
+    ? `${baseUrl}/webhook/1c936cc2-78d2-4f5b-af1f-4fe036e5d63b/?action=${encodeURIComponent(action)}`
     : `${baseUrl}/webhook/1c936cc2-78d2-4f5b-af1f-4fe036e5d63b/?action=answer`; // Default action
 
   try {
@@ -35,7 +44,7 @@ export async function sendLocalChatMessage(message: string, action?: string): Pr
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message }), // Send the user's message in the body
+      body: JSON.stringify({ message }), 
     });
 
     if (!response.ok) {
@@ -55,8 +64,11 @@ export async function sendLocalChatMessage(message: string, action?: string): Pr
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json();
+      // Assuming the API might return actions in data.actions
+      const responseActions = data.actions as ActionItem[] | undefined;
+
       return {
-        reply: `Agent: "${data?.data?.message || data?.reply || "Received a response."}"`,
+        reply: `${data?.data?.message || data?.reply || "Received a response."}`,
         localdata: {
           originalMessage: message,
           action,
@@ -64,6 +76,7 @@ export async function sendLocalChatMessage(message: string, action?: string): Pr
           processingTime: Math.random() * 100,
         },
         data: data,
+        actions: responseActions, 
       };
     } else {
       const textData = await response.text();
@@ -83,7 +96,7 @@ export async function sendLocalChatMessage(message: string, action?: string): Pr
   } catch (error) {
     console.error("Error sending message to local agent or parsing response:", error);
     let errorMessage = "Agent: An unexpected error occurred while contacting the service.";
-    if (error instanceof SyntaxError) { // Specifically for JSON parsing errors
+    if (error instanceof SyntaxError) { 
         errorMessage = "Agent: Received an invalid response format from the server.";
     } else if (error instanceof TypeError && (error.message.toLowerCase().includes('failed to fetch') || error.message.toLowerCase().includes('networkerror'))) {
         errorMessage = "Agent: Could not connect to the server. Please check the API URL and network connection.";
